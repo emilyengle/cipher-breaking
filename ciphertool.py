@@ -15,11 +15,11 @@ if __name__ == '__main__':
 
     # Analyze ciphertext or attempt to crack a given cipher type
     if sys.argv[1] == 'analyze':
-        a = Analyze(ciphertext)
+        a = Analyze(ciphertext, graphDist=True, reportFindings=False)
         a.analyze()
     elif sys.argv[1] == 'crack':
         if sys.argv[2] == 'shift':
-            a = Analyze(ciphertext, graphDist=False)
+            a = Analyze(ciphertext, graphDist=False, reportFindings=False)
             features = a.analyze()
             c = CrackShift(ciphertext)
             c.crack()
