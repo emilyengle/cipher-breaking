@@ -19,14 +19,13 @@ if __name__ == '__main__':
         a.analyze()
     elif sys.argv[1] == 'crack':
         if sys.argv[2] == 'shift':
-            a = Analyze(ciphertext, graphDist=False, reportFindings=False)
-            features = a.analyze()
             c = CrackShift(ciphertext)
             c.crack()
         elif sys.argv[2] == 'ma':
             CrackMa(ciphertext)
         elif sys.argv[2] == 'vigs':
-            CrackVigs(ciphertext)
+            c = CrackVigs(ciphertext)
+            c.crack()
         elif sys.argv[2] == 'playfair':
             CrackPlayfair(ciphertext)
         elif sys.argv[2] == 'transpo':
