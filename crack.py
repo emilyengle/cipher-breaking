@@ -44,29 +44,35 @@ class CrackMa:
 
 
 class CrackVigs:
-    def __init__(self, ciphertext):
+    def __init__(self, ciphertext, keyLength=None):
         self.ct = ciphertext
         self.repetitions = {}
         self.table = []
         self.minKey = 2
         self.maxKey = 17
+        self.keyLength = keyLength
 
     def crack(self):
-        # Build table of trigraph repetition distance factors
-        self.buildRepetitionsDict()
-        self.buildFactorsTable()
+        if not self.keyLength:
+            # Build table of trigraph repetition distance factors
+            self.buildRepetitionsDict()
+            self.buildFactorsTable()
 
-        # Choose most probable keyword length
-        # TODO: improve by trying best 2 or 3 keys? Ex, 8 vs 16
-        keyLength = self.chooseBestKeyLength()
+            # Choose most probable keyword length
+            keyLengths = self.chooseBestKeyLengths()
+        else:
+            keyLengths = [self.keyLength]
 
         # Crack series of shift ciphers given keyword length
-        shiftCiphers = self.breakTextIntoShiftCiphers(keyLength)
-        solvedCiphers = self.solveShiftCiphers(shiftCiphers)
-        plaintext = self.replaceText(solvedCiphers, keyLength)
+        for key in keyLengths:
+            shiftCiphers = self.breakTextIntoShiftCiphers(key)
+            solvedCiphers = self.solveShiftCiphers(shiftCiphers)
+            plaintext = self.replaceText(solvedCiphers, key)
 
-        print "Key length: ", keyLength
-        print "Found plaintext: ", plaintext
+            print "\nKey length tried: ", key
+            print "Found plaintext: ", plaintext
+
+        print "\nIf none of these key lengths look right, run '$ python ciphertool.py crack vigs [keylength]' to try a different key length"
 
     def buildRepetitionsDict(self):
         # Get all trigraphs in text and their number of repetitions, if any
@@ -97,7 +103,7 @@ class CrackVigs:
                         factors[num - self.minKey] = True
             self.table.append(factors)
 
-    def chooseBestKeyLength(self):
+    def chooseBestKeyLengths(self):
         factorCounts = [0 for i in range(self.minKey, self.maxKey + 1)]
         for line in self.table:
             for i in range(0, len(line)):
@@ -105,7 +111,13 @@ class CrackVigs:
                     factorCounts[i] += 1
         factorCountsExpected = [len(factorCounts) / float(i + self.minKey) for i in range(0, len(factorCounts))]
         factorDifferences = [abs(factorCountsExpected[i] - factorCounts[i]) / float(factorCountsExpected[i]) for i in range(0, len(factorCounts))]
-        return factorDifferences.index(max(factorDifferences)) + self.minKey
+
+        bestKeys = []
+        for i in range(3):
+            index = factorDifferences.index(max(factorDifferences))
+            bestKeys.append(index + self.minKey)
+            factorDifferences[index] = 0
+        return bestKeys
 
     def breakTextIntoShiftCiphers(self, keyLength):
         shifts = []

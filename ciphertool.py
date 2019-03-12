@@ -24,7 +24,8 @@ if __name__ == '__main__':
         elif sys.argv[2] == 'ma':
             CrackMa(ciphertext)
         elif sys.argv[2] == 'vigs':
-            c = CrackVigs(ciphertext)
+            keyLength = int(sys.argv[3]) if len(sys.argv) > 3 else None
+            c = CrackVigs(ciphertext, keyLength)
             c.crack()
         elif sys.argv[2] == 'playfair':
             CrackPlayfair(ciphertext)
